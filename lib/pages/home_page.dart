@@ -17,6 +17,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   //instance of auth
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -32,7 +33,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AppName'),
+        title: const Text('SoleFusion Hub'),
         backgroundColor: Colors.blue[100],
         actions: [
           IconButton(
@@ -196,35 +197,8 @@ class _HomePageState extends State<HomePage> {
               Padding(
                 padding: const EdgeInsets.all(15.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // GestureDetector(
-                    //   onTap: () {
-                    //     Scaffold.of(context).openDrawer();
-                    //   },
-                    // ),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF475269).withOpacity(0.3),
-                            blurRadius: 5,
-                            spreadRadius: 1,
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.sort,
-                        size: 30,
-                        color: Color(0xFF475269),
-                      ),
-                    ),
-
-                    const SizedBox(
-                        width: 10), // Added to separate the containers
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
@@ -253,7 +227,43 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 15),
+                        padding: const EdgeInsets.symmetric(horizontal: 15),
+                        height: 55,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF475269).withOpacity(0.3),
+                              blurRadius: 5,
+                              spreadRadius: 1,
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.only(left: 5),
+                              width: 200,
+                              child: TextFormField(
+                                  decoration: const InputDecoration(
+                                border: InputBorder.none,
+                                hintText: "Search",
+                              )),
+                            ),
+                            const Spacer(),
+                            const Icon(
+                              Icons.search,
+                              size: 27,
+                              color: Color(0xFF475269),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                     Container(
                       padding: const EdgeInsets.all(1),
                       decoration: BoxDecoration(
@@ -267,51 +277,6 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ],
                       ),
-                      child: IconButton(
-                        onPressed: signOut,
-                        icon: const Icon(
-                          Icons.logout,
-                          size: 30,
-                          color: Color(0xFF475269),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 15),
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 15),
-                padding: const EdgeInsets.symmetric(horizontal: 15),
-                height: 55,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF475269).withOpacity(0.3),
-                      blurRadius: 5,
-                      spreadRadius: 1,
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(left: 5),
-                      width: 300,
-                      child: TextFormField(
-                          decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        hintText: "Search",
-                      )),
-                    ),
-                    const Spacer(),
-                    const Icon(
-                      Icons.search,
-                      size: 27,
-                      color: Color(0xFF475269),
                     ),
                   ],
                 ),
@@ -319,7 +284,21 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 30),
               const RowItemsWidget(),
               const SizedBox(height: 20),
-              const AllItemsWidget(),
+              //Loads and gets products from the firebase firestore.
+              BlocBuilder<ProductBloc, ProductState>(
+                builder: (context, state) {
+                  if (state is ProductLoading) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (state is ProductLoaded) {
+                    return AllItemsWidget(products: state.products);
+                  } else {
+                    return Text('Something went wrong.');
+                  }
+                },
+              ),
             ],
           ),
         ),
